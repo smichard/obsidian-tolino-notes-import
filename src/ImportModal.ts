@@ -37,29 +37,35 @@ export default class ImportModal extends Modal {
 		contentEl.setText('Tolino Notes loaded!');
 	}
 
-	removeDuplicates(notes: TolinoNoteModel[]) {
+	removeDuplicates(notes: TolinoNoteModel[]): TolinoNoteModel[] {
 		const uniqueTitles = new Set();
 		const uniqueBooks: TolinoNoteModel[] = [];
-
+		const currentDate = new Date().toISOString().split('T')[0];
+		
 		notes.forEach((note) => {
-			if (!uniqueTitles.has(note.bookName)) {
-				uniqueTitles.add(note.bookName);
-				const newNote: TolinoNoteModel = new TolinoNoteModel();
-				newNote.bookName = note.bookName;
-				newNote.noteText = "Tags: " + this.noteTags + os.EOL + os.EOL + "---" + os.EOL;
-				newNote.noteText += "**Seite " + note.page + "**" + ", Erstellt am " + note.date + " " + note.time + os.EOL + note.noteText + os.EOL + "---" + os.EOL;
-				uniqueBooks.push(newNote);
+		  if (!uniqueTitles.has(note.bookName)) {
+			uniqueTitles.add(note.bookName);
+			const newNote: TolinoNoteModel = new TolinoNoteModel();
+			newNote.bookName = note.bookName;
+			// Format the note text to include the front matter
+			newNote.noteText = `---${os.EOL}`;
+			newNote.noteText += `Date: ${currentDate}${os.EOL}`;
+			newNote.noteText += `Type: tolino${os.EOL}`;
+			newNote.noteText += `Tags: ${this.noteTags}${os.EOL}`;
+			newNote.noteText += `---${os.EOL}${os.EOL}`;
+			// newNote.noteText += "Tags: " + this.noteTags + os.EOL + os.EOL;
+			newNote.noteText += `**Page ${note.page}**, Created on ${note.date} ${note.time}${os.EOL}${note.noteText}${os.EOL}---${os.EOL}`;
+			uniqueBooks.push(newNote);
+		  } else {
+			const bookNote = uniqueBooks.find(existingNote => existingNote.bookName === note.bookName);
+			if (bookNote) {
+			  // Append additional note text for the same book
+			  bookNote.noteText += `**Page ${note.page}**, Created on ${note.date} ${note.time}${os.EOL}${note.noteText}${os.EOL}---${os.EOL}`;
 			}
-			else {
-				const bookNote = uniqueBooks.find((existingNote) => existingNote.bookName === note.bookName)
-				if (bookNote) {
-					bookNote.noteText += "**Seite " + note.page + "**" + ", Erstellt am " + note.date + " " + note.time + os.EOL + note.noteText + os.EOL + "---" + os.EOL;
-					uniqueBooks.push(bookNote)
-				}
-			}
+		  }
 		});
 		return uniqueBooks;
-	}
+	  }
 
 	async writeFile(bookName: string, content: string): Promise<void> {
 		const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
