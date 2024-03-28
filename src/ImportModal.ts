@@ -47,13 +47,18 @@ export default class ImportModal extends Modal {
 			uniqueTitles.add(note.bookName);
 			const newNote: TolinoNoteModel = new TolinoNoteModel();
 			newNote.bookName = note.bookName;
+			// Remove # from this.noteTags and save to a new variable
+			const cleanedTags = this.noteTags.replace(/#/g, '').split(',').join(', ');
 			// Format the note text to include the front matter
 			newNote.noteText = `---${os.EOL}`;
 			newNote.noteText += `Date: ${currentDate}${os.EOL}`;
-			newNote.noteText += `Type: tolino${os.EOL}`;
-			newNote.noteText += `Tags: ${this.noteTags}${os.EOL}`;
+			newNote.noteText += `Type: Tolino${os.EOL}`;
+			newNote.noteText += `Title: ${os.EOL}`;
+			newNote.noteText += `Author: ${os.EOL}`;
+			// Use cleanedTags instead of this.noteTags
+			newNote.noteText += `Tags: ${cleanedTags}${os.EOL}`;
 			newNote.noteText += `---${os.EOL}${os.EOL}`;
-			// newNote.noteText += "Tags: " + this.noteTags + os.EOL + os.EOL;
+			//newNote.noteText += "Tags: " + this.noteTags + os.EOL + os.EOL;
 			newNote.noteText += `**Page ${note.page}**, Created on ${note.date} ${note.time}${os.EOL}${note.noteText}${os.EOL}---${os.EOL}`;
 			uniqueBooks.push(newNote);
 		  } else {
@@ -66,7 +71,7 @@ export default class ImportModal extends Modal {
 		});
 		return uniqueBooks;
 	  }
-
+	  
 	async writeFile(bookName: string, content: string): Promise<void> {
 		const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 		let fileName: string;
