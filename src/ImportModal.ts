@@ -91,7 +91,6 @@ export default class ImportModal extends Modal {
 	}
 		  	  
 	async writeFile(bookName: string, content: string): Promise<void> {
-		const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 		let fileName: string;
 		let filePath: string;
 	  
@@ -99,14 +98,14 @@ export default class ImportModal extends Modal {
 		// Assuming bookName is "Title (Last Name, First Name)"
 		const titleMatch = bookName.match(/^(.*?)\s\((.*?),\s(.*?)\)$/);
 		if (titleMatch) {
-		  const title = titleMatch[1];
-		  const lastName = titleMatch[2];
-		  const firstName = titleMatch[3];
-		  // Reformat fileName to "YYYY-MM-DD - Title - First Name Last Name.md"
-		  fileName = `${currentDate} - ${title} - ${firstName} ${lastName}.md`;
+			const title = titleMatch[1];
+			const lastName = titleMatch[2];
+			const firstName = titleMatch[3];
+			// Reformat fileName to "Title - First Name Last Name.md"
+			fileName = `${title} - ${firstName} ${lastName}.md`;
 		} else {
-		  // Fallback if the regex match fails
-		  fileName = `${currentDate} - ${bookName}.md`;
+			// Fallback if the regex match fails
+			fileName = `${bookName}.md`;
 		}
 	  
 		// Normalize fileName to replace any characters that might be invalid in a file path
@@ -115,14 +114,14 @@ export default class ImportModal extends Modal {
 		await checkAndCreateFolder(this.app.vault, this.notesPath);
 	  
 		if (this.notesPath) {
-		  filePath = normalizePath(_path.join(this.notesPath, fileName));
+			filePath = normalizePath(_path.join(this.notesPath, fileName));
 		} else {
-		  filePath = normalizePath(_path.join(this.app.vault.getRoot().path, fileName));
+			filePath = normalizePath(_path.join(this.app.vault.getRoot().path, fileName));
 		}
 		console.info("Writing file: " + filePath);
 		await this.app.vault.adapter.write(filePath, content);
-	  }
-
+	}
+	
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
